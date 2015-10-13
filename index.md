@@ -126,7 +126,7 @@ This talk focuses on the identification of *light* **quarks** (ignoring the heav
 
 * For complex reasons (quantum chromodynamics!&nbsp;😱) that will not be described here, quarks and gluons are not observed individually
 * Instead, we can only measure their decay products
-* What we see is a cone-shaped spray of particles called a *jet*
+* What we observe is a cone-shaped spray of particles called a *jet*
 * The measured particles are grouped together by a jet algorithm
   - Several different approaches and algorithms exist, but the most popular are **sequential recombination algorithms (hierarchical agglomerative clustering)**
   - Somewhat similar to the *k-means* algorithm
@@ -179,7 +179,7 @@ physics
 * Use of multivariate pattern recognition algorithms was basically taboo in new particle searches until recently
 * Much prejudice against using what were considered "black box" selection algorithms
 * Neural nets and Fisher discriminants used somewhat in the 1990's
-* Boosted Decision Trees (AdaBoost, invented in 1996) is the favourite algorithm used for many analyses (1st use: 2004)
+* Boosted Decision Trees (AdaBoost, 1996) is the favourite algorithm used for many analyses (1st use: 2004)
 <br>
 
 
@@ -191,12 +191,12 @@ physics
 - For experimental particle physics, [ROOT](http:://root.cern.ch) is the ubiquitous data analysis tool, and has been for the last 20 years old
 - Command language: CINT ("interpreted C++") or Python
     * Small data: work interactively or run macros
-    * Big data: compile code with ROOT libraries, run on Grid
+    * Big data: compile with ROOT libraries, run on Grid
 - Data format optimised for large data sets
 - Complex algorithms are difficult to do interactively
 - End up writing huge C++ programs
 - Lots of tweaking, endless edit-compile-run loops
-- Might not be the best choice for prototyping new methods
+- The best choice for prototyping new methods?
 <br>
 
 
@@ -385,7 +385,6 @@ highly.correlated <- findCorrelation(
 - *Genetic algorithms*$^\ddagger$
 - *LogitBoost*$^\Diamond$
 <br>
-<br>
 
 **Tried all of these with varying levels of success**
 
@@ -526,7 +525,6 @@ Prediction Gluon Quark
 * To put this in context, 60-70% efficiency is a typical working point for "*b*-jet tagging" and is considered acceptable$^*$
 * However, mis-tag rates are typically much lower; usually about 0.5-2.5%$^*$ $-$ need to do a lot more work here ☹
 <br>
-<br>
 
 
 .footer <small>* [Calibration of the performance of b-tagging for c and light-flavour jets in the 2012 ATLAS data](http://cds.cern.ch/record/1741020/files/ATLAS-CONF-2014-046.pdf), ATLAS Collaboration, ATLAS-CONF-2014-046, 6 July 2014</small>
@@ -534,7 +532,7 @@ Prediction Gluon Quark
 ---
 ### Future work
 
-- I have unbalanced classes: gluon-jets are $>$80% of my data
+- I have unbalanced classes: $>$80% of jets are gluon-jets
   * I got bad results until I realised that most of the classifiers I tried were optimising for accuracy; results improved when I optimised for AUC instead
 - Down-sampling the majority class could hurt performance, as we remove points that could be useful for defining the optimal decision boundary
 - Bagging should help ameliorate this

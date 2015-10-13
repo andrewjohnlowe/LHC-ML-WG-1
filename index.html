@@ -146,7 +146,7 @@ of?</em></li>
   <ul>
 <li>For complex reasons (quantum chromodynamics!&nbsp;😱) that will not be described here, quarks and gluons are not observed individually</li>
 <li>Instead, we can only measure their decay products</li>
-<li>What we see is a cone-shaped spray of particles called a <em>jet</em></li>
+<li>What we observe is a cone-shaped spray of particles called a <em>jet</em></li>
 <li>The measured particles are grouped together by a jet algorithm
 
 <ul>
@@ -206,7 +206,7 @@ physics</li>
 <li>Use of multivariate pattern recognition algorithms was basically taboo in new particle searches until recently</li>
 <li>Much prejudice against using what were considered &quot;black box&quot; selection algorithms</li>
 <li>Neural nets and Fisher discriminants used somewhat in the 1990&#39;s</li>
-<li>Boosted Decision Trees (AdaBoost, invented in 1996) is the favourite algorithm used for many analyses (1st use: 2004)
+<li>Boosted Decision Trees (AdaBoost, 1996) is the favourite algorithm used for many analyses (1st use: 2004)
 <br></li>
 </ul>
 
@@ -223,13 +223,13 @@ physics</li>
 
 <ul>
 <li>Small data: work interactively or run macros</li>
-<li>Big data: compile code with ROOT libraries, run on Grid</li>
+<li>Big data: compile with ROOT libraries, run on Grid</li>
 </ul></li>
 <li>Data format optimised for large data sets</li>
 <li>Complex algorithms are difficult to do interactively</li>
 <li>End up writing huge C++ programs</li>
 <li>Lots of tweaking, endless edit-compile-run loops</li>
-<li>Might not be the best choice for prototyping new methods
+<li>The best choice for prototyping new methods?
 <br></li>
 </ul>
 
@@ -494,7 +494,6 @@ Store(DT) # data.table now stored as RData file on disk and out of RAM
 <li><em>Simulated annealing</em>\(^\ddagger\)</li>
 <li><em>Genetic algorithms</em>\(^\ddagger\)</li>
 <li><em>LogitBoost</em>\(^\Diamond\)
-<br>
 <br></li>
 </ul>
 
@@ -681,7 +680,6 @@ Prediction Gluon Quark
 <li>We mis-tagged 44% of true gluon jets</li>
 <li>To put this in context, 60-70% efficiency is a typical working point for &quot;<em>b</em>-jet tagging&quot; and is considered acceptable\(^*\)</li>
 <li>However, mis-tag rates are typically much lower; usually about 0.5-2.5%\(^*\) \(-\) need to do a lot more work here ☹
-<br>
 <br></li>
 </ul>
 
@@ -691,7 +689,7 @@ Prediction Gluon Quark
 <section class='' data-state='' id='slide-32'>
   <h3>Future work</h3>
   <ul>
-<li>I have unbalanced classes: gluon-jets are $&gt;$80% of my data
+<li>I have unbalanced classes: $&gt;$80% of jets are gluon-jets
 
 <ul>
 <li>I got bad results until I realised that most of the classifiers I tried were optimising for accuracy; results improved when I optimised for AUC instead</li>
