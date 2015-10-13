@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Machine learning for particle physics using R</title>
+  <meta name="description" content="">
+  <meta name="author" content="Andrew John Lowe">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="stylesheet" href="libraries/frameworks/revealjs/css/reveal.min.css">
+  <link rel="stylesheet" href="libraries/frameworks/revealjs/css/theme/sky.css" id="theme">
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/default.css" id="theme">
+  <!--[if lt IE 9]>
+  <script src="lib/js/html5shiv.js"></script>
+  <![endif]-->  <link rel="stylesheet" href = "assets/css/stylesheet.css">
+
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section class='' data-state='' id='slide-1'>
+  
+  <style>
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  font-family: "Quicksand", sans-serif;
+  letter-spacing: -0.08em;
+  text-transform: uppercase;
+  text-shadow: none; }
+.reveal {
+  text-align: left;
+  font-family: "Open Sans", sans-serif;
+}
+.noborder .reveal section img {
+  background:none; 
+  border:none; 
+  box-shadow:none;
+  }
+  .small-code pre code {
+  font-size: 1em;
+}
+.midcenter {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+}
+.footer {
+    color: grey; background: none;
+    text-align:left; width:100%;
+}
+.left {
+    text-align:left;
+}
+.right {
+    text-align:right;
+}
+table.mytable {
+  border: none;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 45px;
+  line-height: 50px;
+  color: black;
+}
+</style>
+
+<h2>Machine learning for particle physics using R</h2>
+
+<p><br></p>
+
+<h4>Andrew John Lowe</h4>
+
+<p><br></p>
+
+<h4>Wigner Research Centre for Physics,</h4>
+
+<h4>Hungarian Academy of Sciences</h4>
+
+<script src="jquery.min.js"></script>
+
+</section>
+<section class='' data-state='' id='slide-2'>
+  <h3>Introduction: about this talk</h3>
+  <ul>
+<li>I&#39;m a particle physicist, physicist programmer, and aspiring data scientist
+
+<ul>
+<li>Worked for 10 years on the development of core software and algorithms for a multi-stage cascade classifier that processes massive data in real-time\(^*\)</li>
+</ul></li>
+<li>I&#39;m not a machine learning expert \(-\) yet</li>
+<li>Nevertheless, switching to R has made it easier for me to ask more complex questions from my data than I would have been able to otherwise</li>
+<li>This is a walk-through of an ongoing analysis that I am performing entirely in R</li>
+<li>Computing power was limited to my own laptop</li>
+</ul>
+
+<p class='footer'><small><br>* <a href="http://biconsulting.hu/letoltes/2015budapestdata/budapestdata2015_loweandrewjohn.pdf">Big Fast Data in High-Energy Particle Physics</a>, A. J. Lowe, Budapest Data Forum, 3 June 2015</small></p>
+
+</section>
+<section class='' data-state='' id='slide-3'>
+  <h3>What is particle physics?</h3>
+  <ul>
+<li>The study of subatomic particles and the fundamental forces that act between them</li>
+<li>Present-day particle physics research represents man&#39;s most ambitious
+and organised effort to answer the question: <em>What is the universe made
+of?</em></li>
+<li>We have an extremely successful model that was developed throughout the mid to late 20th century</li>
+<li>But many questions still remain unanswered
+
+<ul>
+<li>Doesn&#39;t explain: gravity, identity of dark matter, neutrino oscillations, matter/antimatter asymmetry of universe ...</li>
+</ul></li>
+<li>To probe these mysteries and more, we built the Large Hadron Collider</li>
+</ul>
+
+</section>
+<section class='' data-state='' id='slide-4'>
+  <h3>The Large Hadron Collider (LHC)</h3>
+  <p><img src="ring.jpg" alt="LHC"></p>
+
+</section>
+<section class='' data-state='' id='slide-5'>
+  <h3>Example detector at the LHC</h3>
+  <p><img src="atlas.png" alt="ATLAS"></p>
+
+</section>
+<section class='' data-state='' id='slide-6'>
+  <h3>The &quot;Periodic Table&quot; of particles</h3>
+  <p><img src="higgs_standard_model.png" alt="Particles of the Standard Model"></p>
+
+<p>This talk focuses on the identification of <em>light</em> <strong>quarks</strong> (ignoring the heavy types) and <strong>gluons</strong></p>
+
+</section>
+<section class='' data-state='' id='slide-7'>
+  <h3>The &quot;Periodic Table&quot; of particles</h3>
+  <p><img src="higgs_standard_model2.png" alt="Particles of the Standard Model"></p>
+
+<p>This talk focuses on the identification of <em>light</em> <strong>quarks</strong> (ignoring the heavy types) and <strong>gluons</strong></p>
+
+</section>
+<section class='' data-state='' id='slide-8'>
+  <h3>What is a jet?</h3>
+  <ul>
+<li>For complex reasons (quantum chromodynamics!&nbsp;😱) that will not be described here, quarks and gluons are not observed individually</li>
+<li>Instead, we can only measure their decay products</li>
+<li>What we see is a cone-shaped spray of particles called a <em>jet</em></li>
+<li>The measured particles are grouped together by a jet algorithm
+
+<ul>
+<li>Several different approaches and algorithms exist, but the most popular are <strong>sequential recombination algorithms (hierarchical agglomerative clustering)</strong></li>
+<li>Somewhat similar to the <em>k-means</em> algorithm</li>
+</ul></li>
+</ul>
+
+</section>
+<section class='' data-state='' id='slide-9'>
+  <h3>Conceptual picture</h3>
+  <p><img src="clustering.png" alt="Jet clustering"></p>
+
+<p>Jets are viewed as a proxy to the initial quarks and gluons that we can&#39;t measure and are a common feature in high-energy particle collisions</p>
+
+</section>
+<section class='' data-state='' id='slide-10'>
+  <h3>A jet seen by the CMS detector</h3>
+  <p><img src="assets/fig/cmsjet1-1.png" title="plot of chunk cmsjet1" alt="plot of chunk cmsjet1" style="display: block; margin: auto;" /></p>
+
+<p>Charged particle tracks and reconstructed jet cone</p>
+
+</section>
+<section class='' data-state='' id='slide-11'>
+  <h3>A six-jet event seen by CMS</h3>
+  <p><img src="assets/fig/cms-sixjets-1.png" title="plot of chunk cms-sixjets" alt="plot of chunk cms-sixjets" style="display: block; margin: auto;" /></p>
+
+<p>View along detector beam axis</p>
+
+</section>
+<section class='' data-state='' id='slide-12'>
+  <h3>A two-jet event seen by ATLAS</h3>
+  <p><img src="atlas-dijets.png" alt="Dijet event, ATLAS"></p>
+
+<p>View down beam axis, side view, and an &quot;unrolled&quot; detector visualisation showing two big energy peaks</p>
+
+</section>
+<section class='' data-state='' id='slide-13'>
+  <h3>The problem in a nutshell</h3>
+  <ul>
+<li>Beams of energetic protons collide inside our detector</li>
+<li>Quarks and gluons emerge and decay into collimated sprays of particles</li>
+<li>Algorithms cluster these decay products into jets</li>
+<li>For each jet, we&#39;d like to know what initiated it</li>
+<li>Was it a <font color="blue"><strong>Quark?</strong></font> Or a <font color="red"><strong>Gluon?</strong></font></li>
+<li>Being able to accurately discriminate between quark- and gluon-initiated jets would be an extremely powerful tool in the search for new particles and new
+physics</li>
+<li>This is an archetypal classification problem that might be amenable to machine learning</li>
+</ul>
+
+</section>
+<section class='' data-state='' id='slide-14'>
+  <h3>Machine learning<br>&amp; particle physics</h3>
+  <ul>
+<li>Machine learning is more or less what is commonly known in particle physics as multivariate analysis (MVA)</li>
+<li>Used for many years but faced widespread scepticism</li>
+<li>Use of multivariate pattern recognition algorithms was basically taboo in new particle searches until recently</li>
+<li>Much prejudice against using what were considered &quot;black box&quot; selection algorithms</li>
+<li>Neural nets and Fisher discriminants used somewhat in the 1990&#39;s</li>
+<li>Boosted Decision Trees (AdaBoost, invented in 1996) is the favourite algorithm used for many analyses (1st use: 2004)
+<br></li>
+</ul>
+
+<p class='footer'><small><a href="http://iopscience.iop.org/article/10.1088/1742-6596/608/1/012058/meta">Successes, Challenges and Future Outlook of Multivariate Analysis In HEP</a>, Helge Voss, 2015 J. Phys.: Conf. Ser. 608 (2015) 012058; <a href="http://indico.cern.ch/event/382895/">Higgs Machine Learning Challenge visits CERN</a>, 19 May 2015, CERN; <a href="http://arxiv.org/abs/physics/0408124">Boosted Decision Trees as an Alternative to Artificial Neural Networks for Particle Identification</a>, Hai-Jun Yang <em>et al.</em>, Nucl.Instrum.Meth. A543 (2005) 577-584</small></p>
+
+</section>
+<section class='' data-state='' id='slide-15'>
+  
+  <p><img src="root6-banner.png" alt="ROOT"></p>
+
+<ul>
+<li>For experimental particle physics, <a href="http:://root.cern.ch">ROOT</a> is the ubiquitous data analysis tool, and has been for the last 20 years old</li>
+<li>Command language: CINT (&quot;interpreted C++&quot;) or Python
+
+<ul>
+<li>Small data: work interactively or run macros</li>
+<li>Big data: compile code with ROOT libraries, run on Grid</li>
+</ul></li>
+<li>Data format optimised for large data sets</li>
+<li>Complex algorithms are difficult to do interactively</li>
+<li>End up writing huge C++ programs</li>
+<li>Lots of tweaking, endless edit-compile-run loops</li>
+<li>Might not be the best choice for prototyping new methods
+<br></li>
+</ul>
+
+<p class='footer'><small>See <em>Highlights and Analysis of the Answers to the ROOT Users&#39; Survey</em>, <a href="http://indico.cern.ch/event/349459/">&quot;ROOT Turns 20&quot; Users&#39; Workshop</a>, 15-18 September 2015, Saas-Fee, Switzerland</small></p>
+
+</section>
+<section class='' data-state='' id='slide-16'>
+  <h3>On C++ and data analysis</h3>
+  <ul>
+<li>Is C++ a good choice for data analysis?
+
+<ul>
+<li>Spend days coding something that runs in minutes <strong>or</strong></li>
+<li>Write something in a couple of hours that will run during your lunch break?</li>
+<li>Which will get you your answer faster? What strategy will help you define where you should be focusing your efforts and which paths lead to dead-ends?</li>
+</ul></li>
+<li><a href="https://www.youtube.com/watch?v=LR8fQiskYII">Larry Wall</a>, creator of Perl (speaking about differences in the number of lines of code needed to accomplish the same task using different languages):</li>
+</ul>
+
+<p><br>
+<q>You can eat a one-pound stake, or a 100 pounds of shoe leather, and you feel a greater sense of accomplishment after the shoe leather, but maybe there&#39;s some downsides...</q></p>
+
+</section>
+<section class='' data-state='' id='slide-17'>
+  <h3>Why did I choose R?</h3>
+  <ul>
+<li>Chief among those were the need for fast prototyping and high-level abstractions that let me concentrate on what I wanted to achieve, rather than on the mechanics and the highly-granular details of how I might do it</li>
+<li>Incredibly easy to express what I want to achieve</li>
+<li>Exponentially-growing number of add-on packages</li>
+<li>Latest machine learning algorithms are available</li>
+<li>About 2 million R users worldwide\(^*\); technical questions are answered extremely quickly (if not already)</li>
+<li>Not as fast as C++, but my goal is to quickly test new ideas rather than implement a final model</li>
+<li>Beautiful plots</li>
+<li>Fun to work with ☺</li>
+</ul>
+
+<p class='footer'><br><small>* <a href="http://www.inside-r.org/what-is-r">http://www.inside-r.org/what-is-r</a></small></p>
+
+</section>
+<section>
+   <section class='' data-state=''>
+    <h3>Data production pipeline</h3>
+    <ul>
+<li>Use experiment&#39;s software to process Monte Carlo simulated data that contains lots of jets
+
+<ul>
+<li>Insert my own C++ code with handcrafted features</li>
+</ul></li>
+<li>Attach ground-truth class labels (quark/gluon) to each jet
+
+<ul>
+<li>There is significant <em>class noise</em> (mislabelled jets)</li>
+<li>Studies by others indicate the labelling procedure assigns the correct class for 90-95% of jets</li>
+<li>Different labelling schemes exist, but none are perfect because Monte Carlo simulation cannot perfectly simulate real data</li>
+</ul></li>
+<li>Write-out data and convert to CSV format for use in R</li>
+</ul>
+
+    <aside class='notes'>
+      
+    </aside>
+   </section>
+   <section class='' data-state=''>
+    <h3>Class labelling</h3>
+
+<ul>
+<li>Jets labelled using the partons in the generator event record</li>
+<li>Parton with highest \(p_{\mathsf{T}}\) within a \({\Delta}R\) equal to the radius parameter of the jet algorithm determines the jet label
+
+<ul>
+<li>This is identical to the scheme used by ATLAS\(^*\)</li>
+<li>This labelling procedure is not unambiguous and is not strictly identical for different MC generators</li>
+<li>Definitions are not theoretically robust, but studies (with MADGRAPH) have shown that for most generators, truth labelling is identical to matrix-element-based labelling for 90-95% of (isolated) jets
+<br>
+<br></li>
+</ul></li>
+</ul>
+
+<p class='footer'><small>* <em>Light-quark and gluon jet discrimination in \(pp\) collisions at \(\sqrt{s}=\mathrm{7\,TeV}\) with the ATLAS detector</em>, Eur.Phys.J. C74 (2014) 3023; <em>Light-quark and Gluon Jets in ATLAS: Calorimeter Response, Jet Energy Scale Systematics, and Sample Characterization</em>, ATLAS-CONF-2011-053, Mar. 2011, also ATLAS-CONF-2012-138, Sept. 2012</small></p>
+
+    <aside class='notes'>
+      
+    </aside>
+   </section>
+   <section class='' data-state=''>
+    <h3>What about mislabelled jets?</h3>
+
+<ul>
+<li>Can impose a requirement that the jets are isolated to restrict contamination from wide-angle QCD radiation (not done; reduces sample size considerably, doesn&#39;t affect tagging performance much)</li>
+<li>Could construct ~80-90% purified samples from trijet and \(\gamma\)+jet data:
+
+<ul>
+<li>Proximity to photon, \(\eta_{j1}\eta_{j2} + {\Delta}R(\gamma,j) < 2\): quark</li>
+<li>Third jet in 3-jet event, \(|\eta_{j3}| - |\eta_{j1} - \eta_{j2}| < 0\): gluon</li>
+</ul></li>
+<li>Methods exist for dealing with mislabelled training data
+
+<ul>
+<li>Majority vote filtering and consensus filtering can significantly improve classification accuracy for noise levels up to 30%\(^*\)
+<br></li>
+</ul></li>
+</ul>
+
+<p class='footer'><small>* <em>Identifying Mislabeled Training Data</em>, C. E. Brodley and M. A. Friedl, Journal of Artificial Intelligence Research, Vol. 11, pages 131-167, 1999</small></p>
+
+    <aside class='notes'>
+      
+    </aside>
+   </section>
+</section>
+<section class='' data-state='' id='slide-19'>
+  <h3>Getting and cleaning data in R</h3>
+  <ul>
+<li><strong>data.table</strong> is extremely useful here:
+
+<ul>
+<li><strong>fread</strong> found to be at least twice as fast as other methods I tried for importing my data</li>
+<li>Helps me clean and filter my data and is super-fast, especially when using keys:</li>
+</ul></li>
+</ul>
+
+<pre><code>setkey(DT, numTracks) # Set number of particle tracks in the jet to be the key
+DT &lt;- DT[!.(1)] # Remove all single-track jets
+DT[, (bad.cols) := NULL] # Remove junk columns
+</code></pre>
+
+<ul>
+<li><strong>digest</strong> is also useful for removing duplicate columns by fast comparison of hashes:</li>
+</ul>
+
+<pre><code>duplicate.columns &lt;- names(DT)[duplicated(lapply(DT, digest))]
+DT[, (duplicate.columns) := NULL]
+</code></pre>
+
+<ul>
+<li><strong>knitr</strong> and R Markdown used everywhere to document process; broke workflow into chunks, one R Markdown file for each, saving intermediate results along the way</li>
+</ul>
+
+</section>
+<section class='' data-state='' id='slide-20'>
+  <h3>More data munging</h3>
+  <ul>
+<li>To give me some extra space in RAM to work I used <strong>SOAR</strong> (stored object caches for R):</li>
+</ul>
+
+<pre><code>Sys.setenv(R_LOCAL_CACHE = &quot;soar_cache&quot;)
+Store(DT) # data.table now stored as RData file on disk and out of RAM
+</code></pre>
+
+<ul>
+<li><strong>caret</strong> also provides some useful data-munging; I could reduce the size of my data by more than 50% with a conservative cut on correlations between features:</li>
+</ul>
+
+<pre><code>highly.correlated &lt;- findCorrelation(
+  cor(DT[,-ncol(DT), with = FALSE], method = &quot;pearson&quot;),
+  cutoff = 0.95, names = TRUE)
+</code></pre>
+
+<ul>
+<li>Removing duplicate and highly correlated features was critical for enabling my data to fit in RAM
+
+<ul>
+<li>To preserve interpretability, I prefer to choose which features to retain instead of letting <strong>caret</strong> pick features that might have less explanatory value</li>
+</ul></li>
+</ul>
+
+</section>
+<section class='' data-state='' id='slide-21'>
+  <h3>Visualising a correlation matrix</h3>
+  <p><center></p>
+
+<p><img src="assets/fig/corrplot-1.png" title="Correlation matrix viewed with corrplot" alt="Correlation matrix viewed with corrplot" style="display: block; margin: auto;" />
+<small>Package used: <strong>corrplot</strong>. Labels omitted for clarity.</small>
+</center></p>
+
+<ul>
+<li>This visualisation type commonly used in particle physics, albeit with smaller matrices (\(<\) 20 features)</li>
+<li>&quot;OK&quot; for small matrices, but the information value of visualisation diminishes for larger matrices</li>
+</ul>
+
+</section>
+<section class='' data-state='' id='slide-22'>
+  <h3>Visualising a correlation matrix as a dendrogram</h3>
+  <p><img src="assets/fig/dendro-1.png" title="Correlation matrix viewed as dendrogram with ape" alt="Correlation matrix viewed as dendrogram with ape" style="display: block; margin: auto;" />
+<small>Package used: <strong>ape</strong>.<br>Hierarchical clustering of features using correlation as a distance measure.</small></p>
+
+</section>
+<section>
+   <section class='' data-state=''>
+    <h3>Visualising a correlation matrix as a force-directed network</h3>
+    <p><img src="assets/fig/qgraph-1.png" title="Correlation matrix viewed as force-directed network graph with qgraph" alt="Correlation matrix viewed as force-directed network graph with qgraph" style="display: block; margin: auto;" />
+<small>Package used: <strong>qgraph</strong>.<br>Connection strength between features (nodes) is proportional to thair correlation.</small></p>
+
+    <aside class='notes'>
+      
+    </aside>
+   </section>
+</section>
+<section class='' data-state='' id='slide-24'>
+  <h3>Visualising a correlation matrix as a force-directed network</h3>
+  <p><img src="assets/fig/qgraph-labels-1.png" title="Correlation matrix viewed as force-directed network graph with qgraph" alt="Correlation matrix viewed as force-directed network graph with qgraph" style="display: block; margin: auto;" />
+<small>Package used: <strong>qgraph</strong>.<br>Connection strength between features (nodes) is proportional to thair correlation.<br><strong>Edges and nodes can be labelled, but visualisation a little muddled for large networks.</strong></small></p>
+
+</section>
+<section class='' data-state='' id='slide-25'>
+  <h3>Feature ranking &amp; selection</h3>
+  <ul>
+<li>The question addressed by this work can be formally stated as follows: can we use quantitative characteristics of the jets to classify them as quark-jets or gluon-jets? </li>
+<li>This invites the question: how should we find the variables that provide the best discrimination between quark-jets and gluon-jets?</li>
+<li>We can use domain knowledge to drill down to what are believed to be the best discriminants; observables that:
+
+<ul>
+<li>Can explain most of the variance in the data</li>
+<li>Are minimally correlated with each other</li>
+<li>Provide the best predictive power</li>
+</ul></li>
+<li>How to optimally search the feature space? (Manual inspection may be impractical for a large feature set)</li>
+</ul>
+
+</section>
+<section>
+   <section class='' data-state=''>
+    <h3>Problems of too many features</h3>
+    <ul>
+<li>Correlated features can skew prediction</li>
+<li>Irrelevant features (not correlated to class variable) cause unnecessary blowup of the model space</li>
+<li>Irrelevant features can drown the information provided by informative features in noise</li>
+<li>Irrelevant features in a model reduce its explanatory value (also when predictive accuracy is not reduced)</li>
+<li>Training may be slower and more computationally expensive</li>
+<li>Increased risk of overfitting</li>
+</ul>
+
+    <aside class='notes'>
+      
+    </aside>
+   </section>
+   <section class='' data-state=''>
+    <h3>Redundant &amp; irrelevant features</h3>
+
+<p class='left'>What should we do when it is likely that the data contains many redundant or irrelevant features?</p>
+
+<ul>
+<li><strong>Redundant features</strong> are those which provide no more information than the currently selected features</li>
+<li><strong>Irrelevant features</strong> provide no useful information in any context</li>
+</ul>
+
+    <aside class='notes'>
+      
+    </aside>
+   </section>
+</section>
+<section>
+   <section class='' data-state=''>
+    <h3>Feature ranking &amp; selection methods</h3>
+    <p class='left'>Several methods in R for feature ranking and selection:</p>
+
+<ul>
+<li>Iteratively remove features shown by a statistical test to be less relevant than random probes: the <em>Boruta</em> algorithm\(^*\)</li>
+<li>Rank by <em>information gain</em> (Kullback–Leibler divergence)\(^\dagger\)</li>
+<li><em>Correlation Feature Selection</em> (CFS)\(^\dagger\)</li>
+<li><em>Recursive Feature Elimination</em> (RFE, Backwards Selection)\(^\ddagger\)</li>
+<li><em>Simulated annealing</em>\(^\ddagger\)</li>
+<li><em>Genetic algorithms</em>\(^\ddagger\)</li>
+<li><em>LogitBoost</em>\(^\Diamond\)
+<br>
+<br></li>
+</ul>
+
+<p><strong>Tried all of these with varying levels of success</strong></p>
+
+<p class='footer'><small>* <strong>Boruta</strong>, \(\dagger\) <strong>FSelector</strong>, \(\ddagger\) <strong>caret</strong>, \(\Diamond\) <strong>caTools</strong></small></p>
+
+    <aside class='notes'>
+      
+    </aside>
+   </section>
+   <section class='' data-state=''>
+    <h3>Boruta</h3>
+
+<p><small>
+The basic principle, in a nutshell:</p>
+
+<ul>
+<li>Boruta algorithm is a wrapper built around the <em>random forest</em> classification algorithm 
+
+<ul>
+<li>Random forests are an ensemble learning method for classification (and regression) that operate by stochastically growing a forest of decision trees; each tree is grown in such a way that at each split only a random subset of all features is considered</li>
+</ul></li>
+<li>The importance measure of an attribute is obtained as the loss of classification accuracy caused by the random permutation of feature values between objects</li>
+<li>It is computed separately for all trees in the forest which use a given feature for classification</li>
+<li>Then the average and standard deviation of the accuracy loss are computed</li>
+<li>Claims to be robust against &quot;selection bias&quot;\(^*\)</li>
+</ul>
+
+<p></small></p>
+
+<p class='footer'><small>* <em>Selection bias in gene extraction on the basis of microarray gene-expression data</em>, Christophe Ambroise and Geoffrey J. McLachlan, PNAS vol. 99, No. 10 (2002)</small></p>
+
+    <aside class='notes'>
+      
+    </aside>
+   </section>
+   <section class='' data-state=''>
+    <h3>Information gain</h3>
+
+<p><small></p>
+
+<ul>
+<li>Information gain is based on the concept of entropy from information theory and is commonly used to decide which features to use when growing a decision tree<br><br></li>
+</ul>
+
+<p>\[
+Entropy = - \sum_{i}{p_i}{\log_{2}}{p_i}
+\]</p>
+
+<ul>
+<li>In machine learning, this concept can be used to define a preferred sequence of attributes to investigate to most rapidly classify an item</li>
+<li>Such a sequence is called a decision tree</li>
+<li>At each level, the feature with the highest information gain is chosen</li>
+<li>An alternative measure of &quot;node impurity&quot; commonly used in decision tree learning is the Gini impurity:<br><br></li>
+</ul>
+
+<p>\[1 - \sum_{i}{p_i}^2\]</p>
+
+<p></small></p>
+
+    <aside class='notes'>
+      
+    </aside>
+   </section>
+   <section class='' data-state=''>
+    <h3>Recursive Feature Elimination</h3>
+
+<p><small></p>
+
+<ul>
+<li>First, the algorithm fits the model to all predictors
+
+<ul>
+<li>I used a <em>random forest</em> for the model</li>
+</ul></li>
+<li>Each predictor is ranked using its importance to the model</li>
+<li>Let \(S\) be a sequence of ordered numbers which are candidate values for the number of predictors to retain (\(S_1\) \(>\) \(S_2\), \(\dots\))</li>
+<li>At each iteration of feature selection, the \(S_i\) top ranked predictors are retained, the model is refit and performance is assessed</li>
+<li>The value of \(S_i\) with the best performance is determined and the top \(S_i\) predictors are used to fit the final model</li>
+<li>To minimise the possibility of selection bias, I performed k-fold cross-validation during training with ten folds</li>
+</ul>
+
+<p></small></p>
+
+    <aside class='notes'>
+      
+    </aside>
+   </section>
+   <section class='' data-state=''>
+    <h3>Correlation Feature Selection</h3>
+
+<p><small></p>
+
+<ul>
+<li><p>The Correlation Feature Selection (CFS) measure evaluates subsets of features on the basis of the following hypothesis: <em>&quot;Good feature subsets contain features highly correlated with the classification, yet uncorrelated to each other&quot;</em></p></li>
+<li><p>The following equation gives the merit of a feature subset \(S\) consisting of \(k\) features:<br><br></p></li>
+</ul>
+
+<p>\[
+Merit_{S_{k}} = \frac{k\overline{r_{cf}}}{\sqrt{k+k(k-1)\overline{r_{ff}}}}
+\]</p>
+
+<ul>
+<li>where \(\overline{r_{cf}}\) is the average value of all feature-classification correlations, and \(\overline{r_{ff}}\) is the average value of all feature-feature correlations. These variables are referred to as correlations, but are not necessarily Pearson&#39;s correlation coefficient or Spearman&#39;s \(\rho\).</li>
+</ul>
+
+<p></small></p>
+
+    <aside class='notes'>
+      
+    </aside>
+   </section>
+</section>
+<section class='' data-state='' id='slide-28'>
+  <h3>Feature selection results</h3>
+  <ul>
+<li>CFS and LogitBoost\(^*\) are fast and deliver sensible results
+
+<ul>
+<li>Other methods are very slow for large data like mine; this limits their utility somewhat</li>
+</ul></li>
+<li>CFS and LogitBoost select both known features and features that are completely new
+
+<ul>
+<li>Known features: have already been proposed for quark/gluon jet tagging; this is a vital sanity check and indicates that the method works as intended</li>
+<li>New features might provide insight on the underlying physics of the quark/gluon decay process process</li>
+</ul></li>
+<li><strong>Data-driven feature selection can be an effective means of searching the feature space for new discriminant variables</strong>
+
+<ul>
+<li>We don&#39;t currently do this in particle physics</li>
+</ul></li>
+</ul>
+
+<p class='footer'><small>* Thanks to András Benczúr for suggesting LogitBoost for feature selection</small></p>
+
+</section>
+<section class='' data-state='' id='slide-29'>
+  <h3>Features found by CFS</h3>
+  <p><img src="assets/fig/best-features-1.png" title="Selection of best features" alt="Selection of best features" style="display: block; margin: auto;" />
+<small>Packages used: <strong>FSelector</strong>, <strong>reshape2</strong>, <strong>ggplot2</strong>.<br>Selection of best features found by Correlation Feature Selection (CFS)</small></p>
+
+</section>
+<section class='' data-state='' id='slide-30'>
+  <h3>Prototype jet classifier</h3>
+  <ul>
+<li>I decided to use a boosted decision tree as my classifier</li>
+<li>Specifically, I used <em>Stochastic Gradient Boosting</em> or Gradient Boosting Machine (GBM)\(^\dagger\) in <strong>xgboost</strong></li>
+<li>There are several justifications for this choice:
+
+<ul>
+<li>Speed: whereas R is single-threaded, XGBoost runs using multiple threads and is very fast\(^*\)</li>
+<li>Outstanding performance in Kaggle competitions</li>
+<li>Can do <em>early stopping</em>: quit training if performance continues to degrade after N rounds; great for tuning\(^*\)</li>
+<li>Can be tweaked to do Random Forests also\(^*\)</li>
+<li>Robust with respect to <em>class noise</em> (this hurts AdaBoost)
+<br></li>
+</ul></li>
+</ul>
+
+<p class='footer'><small>\(\dagger\) <em>Greedy Function Approximation: A Gradient Boosting Machine</em>, Jerome Friedman, The Annals of Statistics, Vol. 29, No. 5, Oct., 2001; <em>Additive logistic regression: a statistical view of boosting</em>, Jerome Friedman, Trevor Hastie, Robert Tibshirani, The Annals of Statistics, 2000, Vol. 28, No. 2, 337-407</small></p>
+
+<p class='footer'><small>* I&#39;m indebted to Szilárd Pafka for this info. He&#39;s done great work <a href="https://github.com/szilard/benchm-ml">benchmarking these tools</a>.</small></p>
+
+<p><br></p>
+
+</section>
+<section class='' data-state='' id='slide-31'>
+  <h3>Results</h3>
+  <pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction Gluon Quark
+     Gluon 44991  8224
+     Quark 34660 12125
+
+               Accuracy : 0.5712          
+                 95% CI : (0.5681, 0.5742)
+</code></pre>
+
+<ul>
+<li>We correctly tagged 60% of true quark jets</li>
+<li>We mis-tagged 44% of true gluon jets</li>
+<li>To put this in context, 60-70% efficiency is a typical working point for &quot;<em>b</em>-jet tagging&quot; and is considered acceptable\(^*\)</li>
+<li>However, mis-tag rates are typically much lower; usually about 0.5-2.5%\(^*\) \(-\) need to do a lot more work here ☹
+<br>
+<br></li>
+</ul>
+
+<p class='footer'><small>* <a href="http://cds.cern.ch/record/1741020/files/ATLAS-CONF-2014-046.pdf">Calibration of the performance of b-tagging for c and light-flavour jets in the 2012 ATLAS data</a>, ATLAS Collaboration, ATLAS-CONF-2014-046, 6 July 2014</small></p>
+
+</section>
+<section class='' data-state='' id='slide-32'>
+  <h3>Future work</h3>
+  <ul>
+<li>I have unbalanced classes: gluon-jets are $&gt;$80% of my data
+
+<ul>
+<li>I got bad results until I realised that most of the classifiers I tried were optimising for accuracy; results improved when I optimised for AUC instead</li>
+</ul></li>
+<li>Down-sampling the majority class could hurt performance, as we remove points that could be useful for defining the optimal decision boundary</li>
+<li>Bagging should help ameliorate this</li>
+<li>I plan to CV bag\(^*\) to build an ensemble learner and try simultaneously down-sampling the folds used for training
+
+<ul>
+<li>Hope this will reduce training time and increase performance</li>
+</ul></li>
+<li>Add Random Forests and Deep Learning into the mix?
+<br></li>
+</ul>
+
+<p class='footer'><small>* <a href="http://jmlr.org/proceedings/papers/v42/"><em>Dissecting the Winning Solution of the HiggsML Challenge</em></a>, Gábor Melis, Journal of Machine Learning Research, Workshops and Proceedings Vol 42, pp. 57–67, 2015</small></p>
+
+</section>
+<section class='' data-state='' id='slide-33'>
+  <h3>Summary</h3>
+  <ul>
+<li>It&#39;s often said that 80% of data analysis is spent on data munging\(^*\) \(-\) this was certainly true in my case</li>
+<li>However, I&#39;ve found a good set of tools for streamlining this process; I&#39;ve shared what I found most useful here</li>
+<li>I&#39;ve shown how it is possible to use R for fast prototyping of a new method for binary classification
+
+<ul>
+<li>To the best of my knowledge, nobody has tried to do a particle physics analysis like this in R before</li>
+<li>Will be invaluable for helping me decide where to direct my efforts later when building a final model</li>
+</ul></li>
+<li>I didn&#39;t have to spend time writing a ton of code or worrying about dangling pointers, <em>etc.</em></li>
+<li><strong>R lets me focus on achieving the goals of my analysis</strong>
+<br></li>
+</ul>
+
+<p><br></p>
+
+<p class='footer'><small>* <em>Exploratory Data Mining and Data Cleaning</em>, Dasu T, Johnson T (2003), John Wiley &amp; Sons</small></p>
+
+</section>
+<section class='' data-state='' id='slide-34'>
+  <h3>Data Science at CERN</h3>
+  <ul>
+<li><a href="https://indico.cern.ch/event/395374/">&quot;Data science @ LHC2015 Workshop&quot;</a>, 9-13 Nov, CERN
+
+<ul>
+<li>Workshop to help foster connections between the data science and particle physics communities</li>
+<li>Registration to attend is already maxed-out; but you can still join and participate via <a href="https://indico.cern.ch/event/395374/videoconference/">video conference</a></li>
+</ul></li>
+<li>A mailing list <a href="mailto:HEP-data-science@googlegroups.com">HEP-data-science@googlegroups.com</a> has been created to deal with anything concerning both particle physics and data science, in particular machine learning
+
+<ul>
+<li>Announcement/discussion about workshops, challenges, papers, tools, <em>etc.</em></li>
+<li>Open to all, subscription by sending a mail to <a href="mailto:HEP-data-science+subscribe@googlegroups.com">HEP-data-science+subscribe@googlegroups.com</a></li>
+</ul></li>
+</ul>
+
+</section>
+<section class='' data-state='' id='slide-35'>
+  <h2>Thanks!</h2>
+  <p><br></p>
+
+<p><small><a href="https://www.linkedin.com/in/andrewjohnlowe">https://www.linkedin.com/in/andrewjohnlowe</a></small></p>
+
+</section>
+<section class='' data-state='' id='slide-36'>
+  <h4>Join us!</h4>
+  <p><img src="dsatlhc2015.png" alt="Workshop"></p>
+
+</section>
+    </div>
+  </div>
+</body>
+  <script src="libraries/frameworks/revealjs/lib/js/head.min.js"></script>
+  <script src="libraries/frameworks/revealjs/js/reveal.min.js"></script>
+  <script>
+  // Full list of configuration options available here:
+  // https://github.com/hakimel/reveal.js#configuration
+  Reveal.initialize({
+    controls: true,
+    progress: true,
+    history: true,
+    center: true,
+    theme: Reveal.getQueryHash().theme || 'sky', 
+    transition: Reveal.getQueryHash().transition || 'fade', 
+    dependencies: [
+    // Cross-browser shim that fully implements classList -
+    // https://github.com/eligrey/classList.js/
+      { src: 'libraries/frameworks/revealjs/lib/js/classList.js', condition: function() { return !document.body.classList;}},
+      // Zoom in and out with Alt+click
+      { src: 'libraries/frameworks/revealjs/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+      // Speaker notes
+      { src: 'libraries/frameworks/revealjs/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+      // Remote control your reveal.js presentation using a touch device
+      //{ src: 'libraries/frameworks/revealjs/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+      ]
+  });
+  </script>  <!-- MathJax: Fall back to local if CDN offline but local image fonts are not supported (saves >100MB) -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      processEscapes: true
+    }
+  });
+</script>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<!-- <script src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script> -->
+<script>window.MathJax || document.write('<script type="text/x-mathjax-config">MathJax.Hub.Config({"HTML-CSS":{imageFont:null}});<\/script><script src="libraries/widgets/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"><\/script>')
+</script>
+<!-- LOAD HIGHLIGHTER JS FILES -->
+<script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<!-- DONE LOADING HIGHLIGHTER JS FILES -->
+ 
+
+</html>
