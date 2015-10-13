@@ -274,7 +274,7 @@ physics
   - Helps me clean and filter my data and is super-fast, especially when using keys:
   
 ```
-setkey(DT, numTracks) # Set number of particle tracks in the jet to be the key
+setkey(DT, numTracks) # Set number of particle tracks to be the key
 DT <- DT[!.(1)] # Remove all single-track jets
 DT[, (bad.cols) := NULL] # Remove junk columns
 ```
@@ -537,7 +537,7 @@ Prediction Gluon Quark
 - Down-sampling the majority class could hurt performance, as we remove points that could be useful for defining the optimal decision boundary
 - Bagging should help ameliorate this
 - I plan to CV bag$^*$ to build an ensemble learner and try simultaneously down-sampling the folds used for training
-  * Hope this will reduce training time and increase performance
+  * Could reduce training time and increase performance
 - Add Random Forests and Deep Learning into the mix?
 <br>
 
@@ -555,7 +555,6 @@ Prediction Gluon Quark
 - **R lets me focus on achieving the goals of my analysis**
 <br>
 
-<br>
 
 .footer <small>* *Exploratory Data Mining and Data Cleaning*, Dasu T, Johnson T (2003), John Wiley & Sons</small>
 

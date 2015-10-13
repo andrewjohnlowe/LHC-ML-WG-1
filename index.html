@@ -351,7 +351,7 @@ physics</li>
 </ul></li>
 </ul>
 
-<pre><code>setkey(DT, numTracks) # Set number of particle tracks in the jet to be the key
+<pre><code>setkey(DT, numTracks) # Set number of particle tracks to be the key
 DT &lt;- DT[!.(1)] # Remove all single-track jets
 DT[, (bad.cols) := NULL] # Remove junk columns
 </code></pre>
@@ -699,7 +699,7 @@ Prediction Gluon Quark
 <li>I plan to CV bag\(^*\) to build an ensemble learner and try simultaneously down-sampling the folds used for training
 
 <ul>
-<li>Hope this will reduce training time and increase performance</li>
+<li>Could reduce training time and increase performance</li>
 </ul></li>
 <li>Add Random Forests and Deep Learning into the mix?
 <br></li>
@@ -723,8 +723,6 @@ Prediction Gluon Quark
 <li><strong>R lets me focus on achieving the goals of my analysis</strong>
 <br></li>
 </ul>
-
-<p><br></p>
 
 <p class='footer'><small>* <em>Exploratory Data Mining and Data Cleaning</em>, Dasu T, Johnson T (2003), John Wiley &amp; Sons</small></p>
 
