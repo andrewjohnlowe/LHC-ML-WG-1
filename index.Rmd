@@ -11,7 +11,7 @@ mathjax: local
 knit        : slidify::knit2slides
 revealjs:
   theme: sky
-  transition: fade
+  transition: rotate
   center: "true"
   css: stylesheet.css
   slideNumbers: true
@@ -24,44 +24,58 @@ revealjs:
 .reveal h4,
 .reveal h5,
 .reveal h6 {
-  font-family: "Quicksand", sans-serif;
-  letter-spacing: -0.08em;
-  text-transform: uppercase;
-  text-shadow: none; }
+font-family: "Quicksand", sans-serif;
+letter-spacing: -0.08em;
+text-transform: uppercase;
+text-shadow: none; }
 .reveal {
-  text-align: left;
-  font-family: "Open Sans", sans-serif;
+text-align: left;
+font-family: "Open Sans", sans-serif;
 }
 .noborder .reveal section img {
-  background:none; 
-  border:none; 
-  box-shadow:none;
-  }
-  .small-code pre code {
-  font-size: 1em;
+background:none; 
+border:none; 
+box-shadow:none;
+}
+.small-code pre code {
+font-size: 1em;
 }
 .midcenter {
-    position: fixed;
-    top: 50%;
-    left: 50%;
+position: fixed;
+top: 50%;
+left: 50%;
 }
 .footer {
-    color: grey; background: none;
-    text-align:left; width:100%;
+color: grey; background: none;
+text-align:left; width:100%;
 }
 .left {
-    text-align:left;
+text-align:left;
 }
 .right {
-    text-align:right;
+text-align:right;
 }
 table.mytable {
-  border: none;
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 45px;
-  line-height: 50px;
-  color: black;
+border: none;
+width: 100%;
+border-collapse: collapse;
+font-size: 45px;
+line-height: 50px;
+color: black;
+}
+.blink {
+animation: blink 1s steps(5, start) infinite;
+-webkit-animation: blink 1s steps(5, start) infinite;
+}
+@keyframes blink {
+to {
+visibility: hidden;
+}
+}
+@-webkit-keyframes blink {
+to {
+visibility: hidden;
+}
 }
 </style>
 
@@ -77,125 +91,27 @@ table.mytable {
 ---
 ### Introduction: about this talk
 
-* I'm a particle physicist, physicist programmer, and aspiring data scientist
-  - Worked for 10 years on the development of core software and algorithms for a multi-stage cascade classifier that processes massive data in real-time$^*$
-* I'm not a machine learning expert $-$ yet
-* Nevertheless, switching to R has made it easier for me to ask more complex questions from my data than I would have been able to otherwise
-* This is a walk-through of an ongoing analysis that I am performing entirely in R
-* Computing power was limited to my own laptop
+* I'm shamelessly recycling slides that I presented at a data science conference in Budapest two weeks ago, so what follows will contain little (if any) physics
+* As this is the inaugaral meeting of the LHC machine learning WG, let's start with the absolute basics: **tools**
+* I'll talk about how using **R** has made it easier for me to ask more complex questions from my data than I would have been able to otherwise
+* I'm not advocating that everyone should switch to R
+* Hopefully this talk will be complementary to discussions of ROOTR and RMVA
 
-.footer <small><br>* [Big Fast Data in High-Energy Particle Physics](http://biconsulting.hu/letoltes/2015budapestdata/budapestdata2015_loweandrewjohn.pdf), A. J. Lowe, Budapest Data Forum, 3 June 2015</small>
 
 ---
-### What is particle physics?
+### Tools
 
-- The study of subatomic particles and the fundamental forces that act between them
-- Present-day particle physics research represents man's most ambitious
-and organised effort to answer the question: *What is the universe made
-of?*
-- We have an extremely successful model that was developed throughout the mid to late 20th century
-- But many questions still remain unanswered
-    * Doesn't explain: gravity, identity of dark matter, neutrino oscillations, matter/antimatter asymmetry of universe ...
-- To probe these mysteries and more, we built the Large Hadron Collider
+* Recognise that when you chose a specific analysis tool or framework, you are making a choice that invariably involves some kind of trade-off
+  - Not always obvious what this compromise is
+  - Do you have the right tool for the job?
+* *When your only tool is a hammer, everything looks like a nail*
+  - Generally a good idea to have some familiarity with more than one data analysis tool
+* What analysis tools should our students learn?
+  - Given that PhD $\neq$ academic career, what knowledge of tools would provide a good RoI and best equip students with the technical skills they need in a job outside HEP?
+* What is available to particle physicists?
+  
 
----
-### The Large Hadron Collider (LHC)
-
-![LHC](ring.jpg)
-
----
-### Example detector at the LHC
-
-![ATLAS](atlas.png)
-
----
-### The "Periodic Table" of particles
-
-![Particles of the Standard Model](higgs_standard_model.png)
-
-This talk focuses on the identification of *light* **quarks** (ignoring the heavy types) and **gluons**
-
----
-### The "Periodic Table" of particles
-![Particles of the Standard Model](higgs_standard_model2.png)
-
-This talk focuses on the identification of *light* **quarks** (ignoring the heavy types) and **gluons**
-
----
-### What is a jet?
-
-* For complex reasons (quantum chromodynamics!&nbsp;😱) that will not be described here, quarks and gluons are not observed individually
-* Instead, we can only measure their decay products
-* What we observe is a cone-shaped spray of particles called a *jet*
-* The measured particles are grouped together by a jet algorithm
-  - Several different approaches and algorithms exist, but the most popular are **sequential recombination algorithms (hierarchical agglomerative clustering)**
-  - Somewhat similar to the *k-means* algorithm
-
----
-### Conceptual picture
-
-![Jet clustering](clustering.png)
-
-Jets are viewed as a proxy to the initial quarks and gluons that we can't measure and are a common feature in high-energy particle collisions
-
----
-### A jet seen by the CMS detector
-
-```{r cmsjet1, fig.align='center', fig.height=8, fig.width=10, echo=FALSE, message = FALSE, warning = FALSE, error = FALSE}
-require(png)
-require(grid)
-img <- readPNG("cmsjet1.png")
-grid.raster(img)
-```
-
-Charged particle tracks and reconstructed jet cone
-
----
-### A six-jet event seen by CMS
-
-```{r cms-sixjets, fig.align='center', fig.height=8, fig.width=10.3, echo=FALSE, message = FALSE, warning = FALSE, error = FALSE}
-require(png)
-require(grid)
-img <- readPNG("cms-sixjets.png")
-grid.raster(img)
-```
-
-View along detector beam axis
-
----
-### A two-jet event seen by ATLAS
-
-![Dijet event, ATLAS](atlas-dijets.png)
-
-View down beam axis, side view, and an "unrolled" detector visualisation showing two big energy peaks
-
----
-### The problem in a nutshell
-
-- Beams of energetic protons collide inside our detector
-- Quarks and gluons emerge and decay into collimated sprays of particles
-- Algorithms cluster these decay products into jets
-- For each jet, we'd like to know what initiated it
-- Was it a <font color="blue">**Quark?**</font> Or a <font color="red">**Gluon?**</font>
-- Being able to accurately discriminate between quark- and gluon-initiated jets would be an extremely powerful tool in the search for new particles and new
-physics
-- This is an archetypal classification problem that might be amenable to machine learning
-
----
-### Machine learning<br>& particle physics
-
-* Machine learning is more or less what is commonly known in particle physics as multivariate analysis (MVA)
-* Used for many years but faced widespread scepticism
-* Use of multivariate pattern recognition algorithms was basically taboo in new particle searches until recently
-* Much prejudice against using what were considered "black box" selection algorithms
-* Neural nets and Fisher discriminants used somewhat in the 1990's
-* Boosted Decision Trees (AdaBoost, 1996) is the favourite algorithm used for many analyses (1st use: 2004)
-<br>
-
-
-.footer <small>[Successes, Challenges and Future Outlook of Multivariate Analysis In HEP](http://iopscience.iop.org/article/10.1088/1742-6596/608/1/012058/meta), Helge Voss, 2015 J. Phys.: Conf. Ser. 608 (2015) 012058; [Higgs Machine Learning Challenge visits CERN](http://indico.cern.ch/event/382895/), 19 May 2015, CERN; [Boosted Decision Trees as an Alternative to Artificial Neural Networks for Particle Identification](http://arxiv.org/abs/physics/0408124), Hai-Jun Yang *et al.*, Nucl.Instrum.Meth. A543 (2005) 577-584</small>
-
----
+--- &vertical
 ![ROOT](root6-banner.png)
 
 - For experimental particle physics, [ROOT](http:://root.cern.ch) is the ubiquitous data analysis tool, and has been for the last 20 years old
@@ -213,6 +129,12 @@ physics
 .footer <small>See *Highlights and Analysis of the Answers to the ROOT Users' Survey*, ["ROOT Turns 20" Users' Workshop](http://indico.cern.ch/event/349459/), 15-18 September 2015, Saas-Fee, Switzerland</small>
 
 ---
+## What happened outside HEP in the past 20 years?
+
+---
+![Big Data Landscape](Big-Data-Landscape1.png)
+
+---
 ### On C++ and data analysis
 
 - Is C++ a good choice for data analysis?
@@ -225,6 +147,43 @@ physics
 <q>You can eat a one-pound stake, or a 100 pounds of shoe leather, and you feel a greater sense of accomplishment after the shoe leather, but maybe there's some downsides...</q>
 
 ---
+### What I want in my tool box:
+```{r screwdriver, fig.align='center', fig.height=8, fig.width=8, echo=FALSE, message = FALSE, warning = FALSE, error = FALSE}
+require(png)
+require(grid)
+img <- readPNG("screwdriver.png")
+grid.raster(img)
+```
+
+---
+### Sometimes I want to use:
+```{r scalpel, fig.align='center', fig.height=8, fig.width=8, echo=FALSE, message = FALSE, warning = FALSE, error = FALSE,cache=TRUE}
+require(png)
+require(grid)
+img <- readPNG("scalpel.png")
+grid.raster(img)
+```
+
+---
+### Or sometimes:
+```{r hammer, fig.align='center', fig.height=8, fig.width=8, echo=FALSE, message = FALSE, warning = FALSE, error = FALSE,cache=TRUE}
+require(png)
+require(grid)
+img <- readPNG("hammer.png")
+grid.raster(img)
+```
+
+---
+### What ROOT provides
+```{r swiss, fig.align='center', fig.height=8, fig.width=8, echo=FALSE, message = FALSE, warning = FALSE, error = FALSE,cache=TRUE}
+require(png)
+require(grid)
+img <- readPNG("swiss.png")
+grid.raster(img)
+```
+There are positives and negatives here...
+
+---
 ### Why did I choose R?
 
 - Chief among those were the need for fast prototyping and high-level abstractions that let me concentrate on what I wanted to achieve, rather than on the mechanics and the highly-granular details of how I might do it
@@ -232,49 +191,45 @@ physics
 - Exponentially-growing number of add-on packages
 - Latest machine learning algorithms are available
 - About 2 million R users worldwide$^*$; technical questions are answered extremely quickly (if not already)
-- Not as fast as C++, but my goal is to quickly test new ideas rather than implement a final model
+- Not as fast as C++, but **my goal is to quickly test new ideas rather than implement a final model**
 - Beautiful plots
 - Fun to work with ☺
 
 .footer <br><small>* <http://www.inside-r.org/what-is-r></small>
 
+---
+### Downsides to using R?
 
---- &vertical
-### Data production pipeline
+* Can be very slow
+  - Base R is single-threaded
+  - Unlikely to do a full HEP analysis with all the data in R!
+  - But fine for looking at small chunks of data
+  - Avoid *for* loops
+* Your data has to fit into RAM
+  - But not always strictly true
+      - *Revolution R Enterprise* provides the **RevoScaleR** package and XDF file format for Big Data
+      - *H2O.ai* enables users to import data via a reference to an object in a distributed key-value store
+      - Other packages: **ff**, **bigmemory**...
 
-* Use experiment's software to process Monte Carlo simulated data that contains lots of jets
-  - Insert my own C++ code with handcrafted features
-* Attach ground-truth class labels (quark/gluon) to each jet
-    - There is significant *class noise* (mislabelled jets)
-  - Studies by others indicate the labelling procedure assigns the correct class for 90-95% of jets
-  - Different labelling schemes exist, but none are perfect because Monte Carlo simulation cannot perfectly simulate real data
-* Write-out data and convert to CSV format for use in R
+---
+### Getting ROOT data into R
 
-***
-### Class labelling
+- **RootTreeToR** enables users to import ROOT data into R
+- Written by Adam Lyon (FNAL), presented at [useR! 2007](http://user2007.org/)
+- [cdcvs.fnal.gov/redmine/projects/roottreetor](https://cdcvs.fnal.gov/redmine/projects/roottreetor)
+- Requires ROOT to be installed, but no need to run ROOT
 
-- Jets labelled using the partons in the generator event record
-- Parton with highest $p_{\mathsf{T}}$ within a ${\Delta}R$ equal to the radius parameter of the jet algorithm determines the jet label
-    * This is identical to the scheme used by ATLAS$^*$
-    * This labelling procedure is not unambiguous and is not strictly identical for different MC generators
-    * Definitions are not theoretically robust, but studies (with MADGRAPH) have shown that for most generators, truth labelling is identical to matrix-element-based labelling for 90-95% of (isolated) jets
-<br>
-<br>
-    
-.footer <small>* *Light-quark and gluon jet discrimination in $pp$ collisions at $\sqrt{s}=\mathrm{7\,TeV}$ with the ATLAS detector*, Eur.Phys.J. C74 (2014) 3023; *Light-quark and Gluon Jets in ATLAS: Calorimeter Response, Jet Energy Scale Systematics, and Sample Characterization*, ATLAS-CONF-2011-053, Mar. 2011, also ATLAS-CONF-2012-138, Sept. 2012</small>
+```{r eval=FALSE,echo=TRUE}
+# Open and load ROOT tree:
+rt <- openRootChain("TreeName", "FileName")
+N <- nEntries(rt) # number of rows of data
+# Names of branches:
+branches <- RootTreeToR::getNames(rt)
+# Read in a subset of branches (varsList), M rows:
+df <- toR(rt, varsList, nEntries=M)
+```
 
-***    
-### What about mislabelled jets?
-
-- Can impose a requirement that the jets are isolated to restrict contamination from wide-angle QCD radiation (not done; reduces sample size considerably, doesn't affect tagging performance much)
-- Could construct ~80-90% purified samples from trijet and $\gamma$+jet data:
-      * Proximity to photon, $\eta_{j1}\eta_{j2} + {\Delta}R(\gamma,j) < 2$: quark
-      * Third jet in 3-jet event, $|\eta_{j3}| - |\eta_{j1} - \eta_{j2}| < 0$: gluon
-- Methods exist for dealing with mislabelled training data
-    * Majority vote filtering and consensus filtering can significantly improve classification accuracy for noise levels up to 30%$^*$
-<br>
-
-.footer <small>* *Identifying Mislabeled Training Data*, C. E. Brodley and M. A. Friedl, Journal of Artificial Intelligence Research, Vol. 11, pages 131-167, 1999</small>
+- Recently became aware of **ROOTR**, and I look forward to playing with that in the very near future
 
 ---
 ### Getting and cleaning data in R
@@ -321,111 +276,10 @@ highly.correlated <- findCorrelation(
   - To preserve interpretability, I prefer to choose which features to retain instead of letting **caret** pick features that might have less explanatory value
 
 ---
-### Visualising a correlation matrix
-
-<center>
-
-```{r corrplot, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE, fig.height=5.5, fig.align='center',fig.cap="Correlation matrix viewed with corrplot", cache=TRUE}
-require(SOAR)
-Sys.setenv(R_LOCAL_CACHE="../../JetTagging/soar_cache/")
-Attach()
-M <- cor(DT[,-ncol(DT)])
-require(corrplot)
-corrplot(M, order="hclust",tl.pos="n",cl.pos="b")
-```
-<small>Package used: **corrplot**. Labels omitted for clarity.</small>
-</center>
-
-
-* This visualisation type commonly used in particle physics, albeit with smaller matrices ($<$ 20 features)
-* "OK" for small matrices, but the information value of visualisation diminishes for larger matrices
-
-
-
----
-### Visualising a correlation matrix as a dendrogram
-
-```{r dendro, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE, fig.align='center',fig.cap="Correlation matrix viewed as dendrogram with ape", cache=TRUE}
-require(SOAR)
-Sys.setenv(R_LOCAL_CACHE="../../JetTagging/soar_cache/")
-Attach()
-
-distance <- function(x) { (1 - abs(x)) }
-
-dd <- as.dist(distance(M))
-hc <- hclust(dd)
-
-gg_color_hue <- function(n) {
-  hues = seq(15, 375, length=n+1)
-  hcl(h=hues, l=65, c=100)[1:n]
-}
-
-require(ape)
-par(mar = c(2.5, 2.5, 2.5, 2.5))
-hc.cut <- cutree(hc, h = distance(0.95))
-require(RColorBrewer)
-myPalette <- colorRampPalette(rev(brewer.pal(9, "Set1")), space="Lab")
-#color = myPalette(max(hc.cut))
-color = gg_color_hue(max(hc.cut))
-plot(as.phylo(hc), tip.color=color,type = "fan", rotate = 0)
-```
-<small>Package used: **ape**.<br>Hierarchical clustering of features using correlation as a distance measure.</small>
-
---- &vertical
-### Visualising a correlation matrix as a force-directed network
-
-```{r qgraph, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE, fig.align='center',fig.cap="Correlation matrix viewed as force-directed network graph with qgraph", cache=TRUE}
-require(SOAR)
-Sys.setenv(R_LOCAL_CACHE="../../JetTagging/soar_cache/")
-Attach()
-
-require(qgraph)
-
-edge.label.bg <- T
-cex <- 0.75
-borders <- T
-details <- F
-edge.labels <- F
-border.width <- 1
-posCol <- "blue"
-negCol <- "red"
-vTrans <- 128
-
-Q<-qgraph(M,layout="spring", vTrans=vTrans, legend=F, posCol=posCol, negCol=negCol, borders=borders, border.width=border.width,labels=TRUE,label.cex=cex,label.scale=F, edge.labels=edge.labels,edge.label.cex=cex,edge.label.bg=edge.label.bg,details=details)
-#Q<-qgraph(M,layout="spring", vTrans=vTrans, legend=F, posCol=posCol, negCol=negCol, borders=borders, border.width=border.width,labels=names(df[,-ncol(df)]),label.cex=cex,label.scale=F, edge.labels=edge.labels,edge.label.cex=cex,edge.label.bg=edge.label.bg,details=details)
-```
-<small>Package used: **qgraph**.<br>Connection strength between features (nodes) is proportional to thair correlation.</small>
-
----
-### Visualising a correlation matrix as a force-directed network
-
-```{r qgraph-labels, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE, fig.align='center',fig.cap="Correlation matrix viewed as force-directed network graph with qgraph", cache=TRUE}
-require(SOAR)
-Sys.setenv(R_LOCAL_CACHE="../../JetTagging/soar_cache/")
-Attach()
-
-require(qgraph)
-
-edge.label.bg <- T
-cex <- 0.75
-borders <- T
-details <- F
-edge.labels <- T
-border.width <- 1
-posCol <- "blue"
-negCol <- "red"
-vTrans <- 128
-
-#Q<-qgraph(M,layout="spring", vTrans=vTrans, legend=F, posCol=posCol, negCol=negCol, borders=borders, border.width=border.width,labels=TRUE,label.cex=cex,label.scale=F, edge.labels=edge.labels,edge.label.cex=cex,edge.label.bg=edge.label.bg,details=details)
-Q<-qgraph(M,layout="spring", vTrans=vTrans, legend=F, posCol=posCol, negCol=negCol, borders=borders, border.width=border.width,labels=names(df[,-ncol(df)]),label.cex=cex,label.scale=F, edge.labels=edge.labels,edge.label.cex=cex,edge.label.bg=edge.label.bg,details=details)
-```
-<small>Package used: **qgraph**.<br>Connection strength between features (nodes) is proportional to thair correlation.<br>**Edges and nodes can be labelled, but visualisation a little muddled for large networks.**</small>
-
----
 ### Feature ranking & selection
 
-- The question addressed by this work can be formally stated as follows: can we use quantitative characteristics of the jets to classify them as quark-jets or gluon-jets? 
-- This invites the question: how should we find the variables that provide the best discrimination between quark-jets and gluon-jets?
+* How should we find the features that provide the best discrimination between the processes or physics entities that we wish to classify?
+* Given a newly-proposed discriminant variable, how can we rank this new variable against those we already know?
 - We can use domain knowledge to drill down to what are believed to be the best discriminants; observables that:
   * Can explain most of the variance in the data
   * Are minimally correlated with each other
@@ -435,11 +289,13 @@ Q<-qgraph(M,layout="spring", vTrans=vTrans, legend=F, posCol=posCol, negCol=negC
 --- &vertical
 ### Problems of too many features
 
+**Or: why don't we throw everything into a boosted decision tree or neural net and hope for the best?**
+
 - Correlated features can skew prediction
 - Irrelevant features (not correlated to class variable) cause unnecessary blowup of the model space
 - Irrelevant features can drown the information provided by informative features in noise
-- Irrelevant features in a model reduce its explanatory value (also when predictive accuracy is not reduced)
-- Training may be slower and more computationally expensive
+- Irrelevant features in a model reduce its explanatory value
+- *Training may be slower and more computationally expensive*
 - Increased risk of overfitting
 
 ***
@@ -451,22 +307,22 @@ Q<-qgraph(M,layout="spring", vTrans=vTrans, legend=F, posCol=posCol, negCol=negC
 - **Irrelevant features** provide no useful information in any context
 
 --- &vertical
-### Feature ranking & selection methods
+### Feature selection methods
 
 .left Several methods in R for feature ranking and selection:
 
 - Iteratively remove features shown by a statistical test to be less relevant than random probes: the *Boruta* algorithm$^*$
-- Rank by *information gain* (Kullback–Leibler divergence)$^\dagger$
+- Rank by *information gain* (Kullback–Leibler divergence)$^\dagger$ or *Gini impurity*
 - *Correlation Feature Selection* (CFS)$^\dagger$
 - *Recursive Feature Elimination* (RFE, Backwards Selection)$^\ddagger$
 - *Simulated annealing*$^\ddagger$
 - *Genetic algorithms*$^\ddagger$
-- *LogitBoost*$^\Diamond$
+- Many classifiers will output variable importance
 <br>
+- **Tried all of these with varying levels of success**
+  * Speed of some methods limits their utility somewhat
 
-**Tried all of these with varying levels of success**
-
-.footer <small>* **Boruta**, $\dagger$ **FSelector**, $\ddagger$ **caret**, $\Diamond$ **caTools**</small>
+.footer <small>* **Boruta**, $\dagger$ **FSelector**, $\ddagger$ **caret**</small>
 
 ***
 ### Boruta
@@ -540,112 +396,13 @@ $$
 </small>
 
 ---
-### Feature selection results
-
-* CFS and LogitBoost$^*$ are fast and deliver sensible results
-  - Other methods are very slow for large data like mine; this limits their utility somewhat
-* CFS and LogitBoost select both known features and features that are completely new
-  - Known features: have already been proposed for quark/gluon jet tagging; this is a vital sanity check and indicates that the method works as intended
-  - New features might provide insight on the underlying physics of the quark/gluon decay process process
-* **Data-driven feature selection can be an effective means of searching the feature space for new discriminant variables**
-  - We don't currently do this in particle physics
-
-.footer <small>* Thanks to András Benczúr for suggesting LogitBoost for feature selection</small>
-
-
-
-
----
-### Features found by CFS
-
-```{r best-features, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE,fig.width=12,fig.height=7.5, fig.align='center',fig.cap="Selection of best features", cache=TRUE}
-require(SOAR)
-Sys.setenv(R_LOCAL_CACHE="../../JetTagging/soar_cache/")
-Attach()
-
-require(ggplot2)
-print(best_vars_ggplot)
-```
-<small>Packages used: **FSelector**, **reshape2**, **ggplot2**.<br>Selection of best features found by Correlation Feature Selection (CFS)</small>
-
----
-### Prototype jet classifier
-
-* I decided to use a boosted decision tree as my classifier
-* Specifically, I used *Stochastic Gradient Boosting* or Gradient Boosting Machine (GBM)$^\dagger$ in **xgboost**
-* There are several justifications for this choice:
-  - Speed: whereas R is single-threaded, XGBoost runs using multiple threads and is very fast$^*$
-  - Outstanding performance in Kaggle competitions
-  - Can do *early stopping*: quit training if performance continues to degrade after N rounds; great for tuning$^*$
-  - Can be tweaked to do Random Forests also$^*$
-  - Robust with respect to *class noise* (this hurts AdaBoost)
-<br>
-
-.footer <small>$\dagger$ *Greedy Function Approximation: A Gradient Boosting Machine*, Jerome Friedman, The Annals of Statistics, Vol. 29, No. 5, Oct., 2001; *Additive logistic regression: a statistical view of boosting*, Jerome Friedman, Trevor Hastie, Robert Tibshirani, The Annals of Statistics, 2000, Vol. 28, No. 2, 337-407</small>
-
-.footer <small>* I'm indebted to Szilárd Pafka for this info. He's done great work [benchmarking these tools](https://github.com/szilard/benchm-ml).</small>
-
-<br>
-
----
-### Results
-
-```
-Confusion Matrix and Statistics
-
-          Reference
-Prediction Gluon Quark
-     Gluon 44991  8224
-     Quark 34660 12125
-                                          
-               Accuracy : 0.5712          
-                 95% CI : (0.5681, 0.5742)
-```
-
-```{r results, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE,cache=TRUE}
-require(SOAR)
-Sys.setenv(R_LOCAL_CACHE="../../JetTagging/soar_cache/")
-Attach()
-#print((matrix_test$table))
-#print((matrix_test$overall))
-C11<-matrix_test$table[1,1]
-C12<-matrix_test$table[1,2]
-C21<-matrix_test$table[2,1]
-C22<-matrix_test$table[2,2]
-```
-
-
-* We correctly tagged `r round(100*(C22/(C12+C22)))`% of true quark jets
-* We mis-tagged `r round(100*(C21/(C11+C21)))`% of true gluon jets
-* To put this in context, 60-70% efficiency is a typical working point for "*b*-jet tagging" and is considered acceptable$^*$
-* However, mis-tag rates are typically much lower; usually about 0.5-2.5%$^*$ $-$ need to do a lot more work here ☹
-<br>
-
-
-.footer <small>* [Calibration of the performance of b-tagging for c and light-flavour jets in the 2012 ATLAS data](http://cds.cern.ch/record/1741020/files/ATLAS-CONF-2014-046.pdf), ATLAS Collaboration, ATLAS-CONF-2014-046, 6 July 2014</small>
-
----
-### Future work
-
-- I have unbalanced classes: $>$80% of jets are gluon-jets
-  * I got bad results until I realised that most of the classifiers I tried were optimising for accuracy; results improved when I optimised for AUC instead
-- Down-sampling the majority class could hurt performance, as we remove points that could be useful for defining the optimal decision boundary
-- Bagging should help ameliorate this
-- I plan to CV bag$^*$ to build an ensemble learner and try simultaneously down-sampling the folds used for training
-  * Could reduce training time and increase performance
-- Add Random Forests and Deep Learning into the mix?
-<br>
-
-.footer <small>* [*Dissecting the Winning Solution of the HiggsML Challenge*](http://jmlr.org/proceedings/papers/v42/), Gábor Melis, Journal of Machine Learning Research, Workshops and Proceedings Vol 42, pp. 57–67, 2015</small>
-
----
 ### Summary
 
-- It's often said that 80% of data analysis is spent on data munging$^*$ $-$ this was certainly true in my case
+- It's often said that 80% of data analysis is spent on data munging$^*$ $-$ this has certainly been true in my case
 - However, I've found a good set of tools for streamlining this process; I've shared what I found most useful here
-- I've shown how it is possible to use R for fast prototyping of a new method for binary classification
-  * To the best of my knowledge, nobody has tried to do a particle physics analysis like this in R before
-  * Will be invaluable for helping me decide where to direct my efforts later when building a final model
+- To the best of my knowledge, nobody has tried to do a particle physics analysis entirely in R before
+  * Problems with large data, but workarounds exist
+  * Insights gained will be valuable for helping me decide where to direct my efforts later when building a final model
 - I didn't have to spend time writing a ton of code or worrying about dangling pointers, *etc.*
 - **R lets me focus on achieving the goals of my analysis**
 <br>
@@ -653,27 +410,47 @@ C22<-matrix_test$table[2,2]
 
 .footer <small>* *Exploratory Data Mining and Data Cleaning*, Dasu T, Johnson T (2003), John Wiley & Sons</small>
 
----
-### Data Science at CERN
+--- &vertical
+### About these slides
 
-* ["Data science @ LHC2015 Workshop"](https://indico.cern.ch/event/395374/), 9-13 Nov, CERN
-  - Workshop to help foster connections between the data science and particle physics communities
-  - Registration to attend is already maxed-out; but you can still join and participate via [video conference](https://indico.cern.ch/event/395374/videoconference/)
-* A mailing list HEP-data-science@googlegroups.com has been created to deal with anything concerning both particle physics and data science, in particular machine learning
-  - Announcement/discussion about workshops, challenges, papers, tools, *etc.*
-  - Open to all, subscription by sending a mail to HEP-data-science+subscribe@googlegroups.com
+* Like these slides? I made them in R using RStudio!
+* Gratuitous eye-candy comes for free
+* You can mix HTML, CSS, Javascript, $\LaTeX$, Unicode, Markdown, movies and R code chunks that evaluate when you *knit* the slides/document:
+  - This is HTML and CSS: <span class="blink">blink tag!</span>
+  - This is $\LaTeX$: $i \hbar \gamma^\mu \partial_\mu \psi - mc \psi = 0$
+  - This is Unicode: 🐱
+  - Here's some embedded pseudo-analysis code:
 
----
 
-## Thanks!
+```{r pi}
+print(pi)
+```
+
 
 <br>
+Look down there: $\downarrow$
 
-<small>[https://www.linkedin.com/in/andrewjohnlowe](https://www.linkedin.com/in/andrewjohnlowe)</small>
+***
+### Bonus slides can be here
+
+**This is a vertical slide**
+
+Give more detailed information in a *basement level* instead of at the end of a long linear set of slides
+
+Keep going: $\downarrow$
+
+***
+### Dynamic theme switcher
+
+*In case you didn't like the current slide theme...*
+
+```{r echo = F, results = 'asis', comment = NA}
+themes = c("sky", "beige", "simple", "serif", "night", "default", "solarized", "moon")
+names(themes) = gsub("^([a-z])", "\\U\\1", themes, perl = TRUE)
+x = sprintf("[%s](?theme=%s#/themes)", names(themes), themes)
+cat(paste(x, collapse = ' - '))
+```
+
 
 ---
-#### Join us!
-
-![Workshop](dsatlhc2015.png)
-
-
+## Thanks!
